@@ -1,0 +1,16 @@
+quality_log_control/
+│
+├── app.py                # Main application file
+├── config.py             # Configuration for logging levels and file paths
+├── log_ingestor.py       # Log ingestion logic
+├── query_interface.py    # Query interface logic
+├── models.py             # Database models
+├── database.py           # Database setup
+├── requirements.txt      # Project dependencies
+├── README.md             # Project documentation
+├── logs/                 # Directory for log files
+│   ├── log1.log
+│   ├── log2.log
+│   └── log3.log
+└── templates/            # HTML templates for the web interface
+    └── index.html

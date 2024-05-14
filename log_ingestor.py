@@ -1,34 +1,49 @@
-import os
-import json
+# log_ingestor.py
+
+from flask import Flask, request
 from datetime import datetime
+import json
+import os
 
-class LogIngestor:
-    def _init_(self, config):
-        # Load configuration
-        self.config = config
+from config import LOGGING_LEVELS, LOG_FILES
+from database import get_session, LogEntry
 
-        # Create log directory if not exists
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
+app = Flask(__name__)
 
-    def ingest_log(self, log_data):
-        try:
-            # Parse log data
-            log_data = json.loads(log_data)
+@app.route('/log/<api_name>', methods=['POST'])
+def log(api_name):
+    if api_name not in LOG_FILES:
+        return {"error": "Invalid API name"}, 400
+    
+    log_data = request.json
+    level = log_data.get('level')
+    log_string = log_data.get('log_string')
+    timestamp = log_data.get('timestamp', datetime.utcnow().isoformat())
+    source = log_data.get('source', f'{api_name}.log')
 
-            # Validate log format
-            required_fields = ['level', 'log_string', 'timestamp', 'metadata']
-            if not all(field in log_data for field in required_fields):
-                raise ValueError("Invalid log format. Missing required fields.")
+    log_entry = {
+        "level": level,
+        "log_string": log_string,
+        "timestamp": timestamp,
+        "source": source
+    }
 
-            # Validate timestamp format
-            datetime.strptime(log_data['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
+    with open(LOG_FILES[api_name], 'a') as f:
+        f.write(json.dumps(log_entry) + '\n')
 
-            # Write log to file
-            log_file = os.path.join('logs', log_data['metadata']['source'])
-            with open(log_file, 'a') as file:
-                file.write(json.dumps(log_data) + '\n')
+    session = get_session()
+    new_log = LogEntry(
+        level=level,
+        log_string=log_string,
+        timestamp=datetime.fromisoformat(timestamp),
+        source=source
+    )
+    session.add(new_log)
+    session.commit()
+    
+    return {"message": "Log entry created"}, 201
 
-            return True, None
-        except Exception as e:
-            return False, str(e)
+if __name__ == '__main__':
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    app.run(debug=True)

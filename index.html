@@ -1,0 +1,25 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Query Logs</title>
+</head>
+<body>
+    <h1>Query Logs</h1>
+    <form action="/query_logs" method="get">
+        <label for="level">Level:</label>
+        <input type="text" id="level" name="level"><br>
+        <label for="log_string">Log String:</label>
+        <input type="text" id="log_string" name="log_string"><br>
+        <label for="start_time">Start Time:</label>
+        <input type="datetime-local" id="start_time" name="start_time"><br>
+        <label for="end_time">End Time:</label>
+        <input type="datetime-local" id="end_time" name="end_time"><br>
+        <label for="source">Source:</label>
+        <input type="text" id="source" name="source"><br>
+        <input type="submit" value="Query">
+    </form>
+</body>
+</html>
